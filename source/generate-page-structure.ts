@@ -5,29 +5,22 @@ import { Page } from "puppeteer";
 
 import { Configuration } from "./models";
 import { PuppeteerBrowser } from "./puppeteer-browser";
-import { createDefaultHtml, logInfo, rewriteHtml } from "./utils";
+import { createDefaultHtml, getRootPath, logInfo, rewriteHtml } from "./utils";
 
 export class GeneratePageStructure {
   private options: Configuration;
   private filepath: string;
 
   constructor(options: Configuration) {
-    const { output, background, init, includeElement } = options;
+    const { output } = options;
     this.options = {
       ...options,
       output: {
         filepath: output.filepath,
         injectSelector: output?.injectSelector || "body",
       },
-      background: background || "#ecf0f2",
-      init: init || function () {},
-      includeElement: includeElement || function () {},
     };
-    this.filepath =
-      !output.filepath || path.isAbsolute(output.filepath)
-        ? output.filepath
-        : path.join(process.cwd(), output.filepath);
-    createDefaultHtml(this.filepath);
+    this.filepath = createDefaultHtml(getRootPath(output.filepath || "./"));
   }
 
   async start() {

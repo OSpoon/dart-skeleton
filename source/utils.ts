@@ -13,22 +13,20 @@ export function logInfo(tag: string, message: string, exit?: boolean) {
 }
 
 export function createDefaultHtml(filepath: string) {
-  if (filepath) {
-    if (!fs.existsSync(filepath)) {
-      console.log(
-        "%c [ output.filepath:404 ]: ",
-        "color: #bf2c9f; background: pink; font-size: 13px;",
-        "please provide the output filepath !"
-      );
-      process.exit(0);
-    } else {
-      const fileStat = fs.statSync(filepath);
-      if (fileStat.isDirectory()) {
-        filepath = path.join(filepath, "default.html");
-        fs.writeFileSync(filepath, defaultHtml);
-      }
-    }
+  if (!fs.existsSync(filepath)) {
+    console.log(
+      "%c [ output.filepath:404 ]: ",
+      "color: #bf2c9f; background: pink; font-size: 13px;",
+      "please provide the output filepath !"
+    );
+    process.exit(0);
   }
+  const fileStat = fs.statSync(filepath);
+  if (fileStat.isDirectory()) {
+    filepath = path.join(filepath, "default.html");
+    fs.writeFileSync(filepath, defaultHtml);
+  }
+  return filepath;
 }
 
 /**
@@ -45,4 +43,14 @@ export function rewriteHtml(selector: string, filepath: string, html: string) {
     $(selector).html(html);
     fs.writeFileSync(filepath, $.html("html"));
   }
+}
+
+/**
+ * 获取入口文件路径
+ * @param filepath
+ */
+export function getRootPath(filepath: string) {
+  return !filepath || path.isAbsolute(filepath)
+    ? filepath
+    : path.join(process.cwd(), filepath);
 }
