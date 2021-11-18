@@ -1,6 +1,6 @@
 # dart-skeleton
 
-> 此项目是在[dps](https://github.com/famanoder/dps)项目基础上重写的Ts版本，强类型的语言编译学习和入门理解。
+> 此项目是在[dps](https://github.com/famanoder/dps)项目基础上重写的Ts版本，强类型的语言便于学习和入门理解。
 
 ### 构建说明：
 
