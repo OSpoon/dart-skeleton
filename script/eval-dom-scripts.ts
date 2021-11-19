@@ -48,8 +48,8 @@ interface DrawBlock {
   subClas?: boolean;
 }
 
-const WIN_W = window.innerWidth;
-const WIN_H = window.innerHeight;
+const WIN_WIDTH = window.innerWidth;
+const WIN_HEIGHT = window.innerHeight;
 
 const ELEMENTS = [
   "audio",
@@ -78,6 +78,45 @@ const classProps: ClassProps = {
 };
 
 /**
+ * 解析入参数组为对象格式
+ * @param attrs 
+ * @returns 
+ */
+function parseAgrs(attrs: Attribute[]) {
+  let params = {};
+  attrs.forEach(({ name, type, value }) => {
+    const v =
+      type === "function"
+        ? _eval("(" + value + ")")
+        : type === "object"
+          ? JSON.parse(value)
+          : value;
+    Reflect.set(params, name, v);
+  });
+  return params;
+}
+
+/**
+ * 计算百分比
+ * @param {*} total
+ * @param {*} x
+ * @returns
+ */
+function percent(total: number, x: number): number {
+  return Number(parseFloat(`${x / total * 100}`).toFixed(3));
+}
+
+/**
+ * 当前节点是否在给定列表中包含
+ * @param elements 
+ * @param node 
+ * @returns 
+ */
+function includeElement(elements: string[], node: HTMLElement) {
+  return ~elements.indexOf((node.tagName || "").toLowerCase());
+}
+
+/**
  * 获取节点的指定属性的值
  * Node.nodeType ELEMENT_NODE=1
  * @param {*} node
@@ -93,16 +132,6 @@ function getStyle(node: Element, attr: string): string {
 }
 
 /**
- * 计算百分比
- * @param {*} total
- * @param {*} x
- * @returns
- */
-function percent(total: number, x: number): number {
-  return Number(parseFloat(`${x / total * 100}`).toFixed(3));
-}
-
-/**
  * 是否隐藏节点
  * @param {*} node
  * @returns
@@ -112,10 +141,6 @@ function isHideStyle(node: HTMLElement) {
   const isHidden = getStyle(node, "visibility") === "hidden";
   const isNoOpacity = Number(getStyle(node, "opacity")) === 0;
   return isNone || isHidden || isNoOpacity || node.hidden;
-}
-
-function includeElement(elements: string[], node: HTMLElement) {
-  return ~elements.indexOf((node.tagName || "").toLowerCase());
 }
 
 function isCustomCardBlock(node: HTMLElement) {
@@ -132,8 +157,8 @@ function isCustomCardBlock(node: HTMLElement) {
     (!hasNoBorder || getStyle(node, "box-shadow") != "none") &&
     w > 0 &&
     h > 0 &&
-    w < 0.95 * WIN_W &&
-    h < 0.3 * WIN_H
+    w < 0.95 * WIN_WIDTH &&
+    h < 0.3 * WIN_HEIGHT
   );
   return customCardBlock;
 }
@@ -163,7 +188,7 @@ function getPadding(node: HTMLElement) {
   };
 }
 
-class DrawPageframe {
+class DrawPageFrame {
   rootNode = document.body;
   blocks: string[] = [];
   originStyle: OriginStyle = {
@@ -234,7 +259,7 @@ class DrawPageframe {
       const hHeight = parseInt(`${height}`);
       const hBackground = background || this.background;
       this.drawBlock({
-        height: percent(WIN_H, hHeight),
+        height: percent(WIN_HEIGHT, hHeight),
         zIndex: 999,
         background: hBackground,
         subClas: true,
@@ -291,7 +316,7 @@ class DrawPageframe {
           const hasText = node.nodeType === 3 && node.textContent.trim().length;
           // 4. 当设置头时,元素被头覆盖了,那么就跳过不绘制了
           const inHEAD = this.inHeader(node);
-          // TODO 存疑
+          // 5. 在特殊元素列表指定的需要绘制
           const includeEle = includeElement(ELEMENTS, node);
           const isCCB = isCustomCardBlock(node);
           if (
@@ -304,8 +329,8 @@ class DrawPageframe {
               w > 0 &&
               h > 0 &&
               l >= 0 &&
-              l < WIN_W &&
-              WIN_H - t >= 20 &&
+              l < WIN_WIDTH &&
+              WIN_HEIGHT - t >= 20 &&
               t >= 0
             ) {
               const { paddingTop, paddingLeft, paddingBottom, paddingRight } =
@@ -313,10 +338,10 @@ class DrawPageframe {
               const radius = getStyle(node, "border-radius");
               // 绘制色块
               this.drawBlock({
-                width: percent(WIN_W, w - paddingLeft - paddingRight),
-                height: percent(WIN_H, h - paddingTop - paddingBottom),
-                top: percent(WIN_H, t + paddingTop),
-                left: percent(WIN_W, l + paddingLeft),
+                width: percent(WIN_WIDTH, w - paddingLeft - paddingRight),
+                height: percent(WIN_HEIGHT, h - paddingTop - paddingBottom),
+                top: percent(WIN_HEIGHT, t + paddingTop),
+                left: percent(WIN_WIDTH, l + paddingLeft),
                 radius: radius,
               });
             }
@@ -333,7 +358,7 @@ class DrawPageframe {
     return this.showBlocks();
   }
 
-  private skipNode(node: any) {
+  skipNode(node: any) {
     const isHideNode = isHideStyle(node);
     // 自定义跳过的元素
     const isCustomSkip =
@@ -356,47 +381,34 @@ class DrawPageframe {
     radius,
     subClas = false,
   }: DrawBlock) {
-    const styles = ["height:" + height + "%"];
+    const styles = [`height:${height}%`];
     if (!subClas) {
-      styles.push(
-        "top:" + top + "%",
-        "left:" + left + "%",
-        "width:" + width + "%"
-      );
+      styles.push(`top:${top}%`, `left:${left}%`, `width:${width}%`);
     }
     if (classProps.zIndex !== zIndex) {
-      styles.push("z-index:" + zIndex);
+      styles.push(`z-index:${zIndex}`);
     }
     if (classProps.background !== background) {
-      styles.push("background:" + background);
+      styles.push(`background:${background}`);
     }
-    radius && radius != "0px" && styles.push("border-radius:" + radius);
+    radius && radius != "0px" && styles.push(`border-radius:${radius}`);
     this.blocks.push(
       `<div class="_${subClas ? " __" : ""}" style="${styles.join(";")}"></div>`
     );
   }
 }
 
-function parseAgrs(attrs: Attribute[]) {
-  let params = {};
-  attrs.forEach(({ name, type, value }) => {
-    const v =
-      type === "function"
-        ? _eval("(" + value + ")")
-        : type === "object"
-          ? JSON.parse(value)
-          : value;
-    Reflect.set(params, name, v);
-  });
-  return params;
-}
-
+/**
+ * 启动脚本函数,挂载到window便于调用
+ * @param args 
+ * @returns 
+ */
 // @ts-ignore
 window.evalDOMScripts = (...args: any) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try {
-        const html = new DrawPageframe(parseAgrs(args)).startDraw();
+        const html = new DrawPageFrame(parseAgrs(args)).startDraw();
         resolve(html);
       } catch (e) {
         reject(e);

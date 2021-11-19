@@ -15,9 +15,9 @@ export function logInfo(tag: string, message: string, exit?: boolean) {
 export function createDefaultHtml(filepath: string) {
   if (!fs.existsSync(filepath)) {
     console.log(
-      "%c [ output.filepath:404 ]: ",
+      "%c [ Initialization failed ]: ",
       "color: #bf2c9f; background: pink; font-size: 13px;",
-      "please provide the output filepath !"
+      "未能找到指定的入口文件，请排查！"
     );
     process.exit(0);
   }
