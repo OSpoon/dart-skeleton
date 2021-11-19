@@ -228,78 +228,27 @@ class DrawPageFrame {
     this.blocks.push(inlineStyle.join(""));
   }
 
-  resetDOM() {
-    this.init && this.init();
-    this.originStyle = {
-      scrollTop: window.scrollY,
-      bodyOverflow: getStyle(document.body, "overflow"),
-    };
-    window.scrollTo(0, this.offsetTop);
-    document.body.style.cssText += "overflow:hidden!important;";
-    this.drawBlock({
-      height: 100,
-      zIndex: 990,
-      background: "#fff",
-      subClas: true,
-    });
-    this.withHeader();
-  }
-
-  inHeader(node: HTMLElement) {
-    if (this.header) {
-      const height = parseInt(`${this.header.height}`);
-      const { t } = getRect(node);
-      return t <= height;
-    }
-  }
-
-  withHeader() {
-    if (this.header) {
-      const { height, background } = this.header;
-      const hHeight = parseInt(`${height}`);
-      const hBackground = background || this.background;
-      this.drawBlock({
-        height: percent(WIN_HEIGHT, hHeight),
-        zIndex: 999,
-        background: hBackground,
-        subClas: true,
-      });
-    }
-  }
-
-  showBlocks() {
-    if (this.blocks.length) {
-      const { body } = document;
-      const blocksHTML = this.blocks.join("");
-      const div = document.createElement("div");
-      div.innerHTML = blocksHTML;
-      body.appendChild(div);
-      window.scrollTo(0, this.originStyle.scrollTop);
-      document.body.style.overflow = this.originStyle.bodyOverflow;
-      return blocksHTML;
-    }
-  }
-
   startDraw() {
     this.resetDOM();
     // body NodeList
     const nodes = this.rootNode.childNodes;
 
-    const deepFindNode = (nodes: string | any[] | NodeListOf<ChildNode>) => {
+    const deepTraverseNode = (nodes: string | any[] | NodeListOf<ChildNode>) => {
       if (nodes.length) {
         for (let i = 0; i < nodes.length; i++) {
           let node = nodes[i];
           let childNodes = node.childNodes;
-
           // 不进行绘制的元素
-          const { isHideNode, isCustomSkip } = this.skipNode(node);
+          const isHideNode = isHideStyle(node);
+          // 自定义跳过的元素
+          const isCustomSkip = typeof this.includeElement === "function" && this.includeElement(node, this.drawBlock) == false;
           if (isHideNode || isCustomSkip) continue;
 
           // 需要绘制的元素
           // 1. 元素设置了背景图,即使内容空也绘制
           let background = getStyle(node, "background-image");
           let backgroundHasurl = background.match(/url\(.+?\)/);
-          const hasBgUrl = backgroundHasurl && backgroundHasurl.length;
+          const _hasBackgroundHasurl = backgroundHasurl && backgroundHasurl.length;
           // 2. 子元素遍历后有文本元素且有内容就绘制
           let hasChildText = false;
           for (let j = 0; j < childNodes.length; j++) {
@@ -315,13 +264,14 @@ class DrawPageFrame {
           // 3. 本身元素为文本的且有内容
           const hasText = node.nodeType === 3 && node.textContent.trim().length;
           // 4. 当设置头时,元素被头覆盖了,那么就跳过不绘制了
-          const inHEAD = this.inHeader(node);
+          const _inHeader = this.inHeader(node);
           // 5. 在特殊元素列表指定的需要绘制
-          const includeEle = includeElement(ELEMENTS, node);
-          const isCCB = isCustomCardBlock(node);
+          const _includeElement = includeElement(ELEMENTS, node);
+          // 存疑
+          const _isCustomCardBlock = isCustomCardBlock(node);
           if (
-            (includeEle || hasBgUrl || hasText || hasChildText || isCCB) &&
-            !inHEAD
+            (_includeElement || _hasBackgroundHasurl || hasText || hasChildText || _isCustomCardBlock) &&
+            !_inHeader
           ) {
             // top left width high
             const { t, l, w, h } = getRect(node);
@@ -329,12 +279,11 @@ class DrawPageFrame {
               w > 0 &&
               h > 0 &&
               l >= 0 &&
+              t >= 0 &&
               l < WIN_WIDTH &&
-              WIN_HEIGHT - t >= 20 &&
-              t >= 0
+              WIN_HEIGHT - t >= 20
             ) {
-              const { paddingTop, paddingLeft, paddingBottom, paddingRight } =
-                getPadding(node);
+              const { paddingTop, paddingLeft, paddingBottom, paddingRight } = getPadding(node);
               const radius = getStyle(node, "border-radius");
               // 绘制色块
               this.drawBlock({
@@ -345,26 +294,58 @@ class DrawPageFrame {
                 radius: radius,
               });
             }
-          } else if (childNodes && childNodes.length) {
+          }
+          // 存在子节点的情况下要进行递归遍历,当前节点为文本类型的跳过
+          if (childNodes && childNodes.length) {
             if (!hasChildText) {
-              deepFindNode(childNodes);
+              deepTraverseNode(childNodes);
             }
           }
         }
       }
     };
-
-    deepFindNode(nodes);
+    // 遍历Node节点进行处理
+    deepTraverseNode(nodes);
     return this.showBlocks();
   }
 
-  skipNode(node: any) {
-    const isHideNode = isHideStyle(node);
-    // 自定义跳过的元素
-    const isCustomSkip =
-      typeof this.includeElement === "function" &&
-      this.includeElement(node, this.drawBlock) == false;
-    return { isHideNode, isCustomSkip };
+  resetDOM() {
+    this.init && this.init();
+    this.originStyle = {
+      scrollTop: window.scrollY,
+      bodyOverflow: getStyle(document.body, "overflow"),
+    };
+    window.scrollTo(0, this.offsetTop);
+    document.body.style.cssText += "overflow:hidden!important;";
+    this.drawBlock({
+      height: 100,
+      zIndex: 990,
+      background: "#fff",
+      subClas: true,
+    });
+    if (this.header) {
+      this.withHeader();
+    }
+  }
+
+  inHeader(node: HTMLElement) {
+    if (this.header) {
+      const height = parseInt(`${this.header.height}`);
+      const { t } = getRect(node);
+      return t <= height;
+    }
+  }
+
+  withHeader() {
+    const { height, background } = this.header!;
+    const hHeight = parseInt(`${height}`);
+    const hBackground = background || this.background;
+    this.drawBlock({
+      height: percent(WIN_HEIGHT, hHeight),
+      zIndex: 999,
+      background: hBackground,
+      subClas: true,
+    });
   }
 
   /**
@@ -395,6 +376,21 @@ class DrawPageFrame {
     this.blocks.push(
       `<div class="_${subClas ? " __" : ""}" style="${styles.join(";")}"></div>`
     );
+  }
+
+  /**
+   * 将片段直接注入当前网页的body节点下进行预览
+   * @returns 
+   */
+  showBlocks() {
+    const { body } = document;
+    const blocksHTML = this.blocks.join("");
+    const div = document.createElement("div");
+    div.innerHTML = blocksHTML;
+    body.appendChild(div);
+    window.scrollTo(0, this.originStyle.scrollTop);
+    document.body.style.overflow = this.originStyle.bodyOverflow;
+    return blocksHTML;
   }
 }
 
