@@ -2,6 +2,10 @@
 
 > 此项目是在[dps](https://github.com/famanoder/dps)项目基础上重写的Ts版本，强类型的语言便于学习和入门理解。
 
+### CLI使用说明：
+ds init： 初始化dart.skeleton.config配置文件
+ds start：启动为目标页面生成骨架片段
+
 ### 构建说明：
 
 1. 全局安装Typescript，调试代码推荐一起安装ts-node：
@@ -32,3 +36,8 @@ yarn build:source
 ```sh
 yarn start
 ```
+
+### 测试地址：
+1. https://www.baidu.com/
+2. https://m.jd.com/
+3. https://main.m.taobao.com/
