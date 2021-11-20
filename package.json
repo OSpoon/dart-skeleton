@@ -2,13 +2,27 @@
   "name": "dart-skeleton",
   "version": "0.0.1",
   "description": "快速骨架屏片段生成器",
-  "main": "index.js",
+  "main": "src",
+  "bin": {
+    "ds":"bin/ds.js"
+  },
   "scripts": {
-    "start": "node ./bin/skeleton.js",
+    "start": "node ./bin/ds.js",
     "build:script": "tsc -p ./script/tsconfig.json",
     "build:source": "tsc -p ./source/tsconfig.json"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:OSpoon/dart-skeleton.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OSpoon/dart-skeleton/issues"
+  },
+  "homepage": "https://github.com/OSpoon/dart-skeleton#readme",
+  "keywords": [
+    "skeleton",
+    "puppeteer"
+  ],
   "author": "OSpoon",
   "license": "ISC",
   "devDependencies": {
@@ -16,6 +30,8 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
+    "commander": "^8.3.0",
+    "prompts": "^2.4.2",
     "puppeteer": "^11.0.0"
   }
 }
