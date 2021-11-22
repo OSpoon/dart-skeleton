@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { defaultHtml } from "./default.html";
-import cheerio from "cheerio";
+import { JSDOM } from 'jsdom';
 
 export function logInfo(tag: string, message: string, exit?: boolean) {
   console.log(
@@ -35,13 +35,19 @@ export function createDefaultHtml(filepath: string) {
  * @param html
  */
 export function rewriteHtml(selector: string, filepath: string, html: string) {
-  if (filepath) {
-    let fileHTML = fs.readFileSync(filepath);
-    let $ = cheerio.load(fileHTML, {
-      decodeEntities: false,
-    });
-    $(selector).html(html);
-    fs.writeFileSync(filepath, $.html("html"));
+  const appendContent = html;
+  const htmlContent = fs.readFileSync(filepath, 'utf-8');
+  const dom = new JSDOM(htmlContent);
+  if (dom) {
+    const appContent = dom.window.document.querySelector(selector);
+    if (appContent) {
+      appContent.innerHTML = appendContent;
+    }
+    const html = dom.window.document.querySelector('html');
+    if (html) {
+      const result = html.outerHTML;
+      fs.writeFileSync(filepath, result)
+    }
   }
 }
 
