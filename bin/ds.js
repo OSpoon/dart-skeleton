@@ -12,6 +12,11 @@ program
   .description("启动为目标页面生成骨架片段~")
   .action(require("../lib/start"));
 
+program
+  .command("remove")
+  .description("清除init生成的配置文件~")
+  .action(require("../lib/remove"));
+
 program.parse(process.argv);
 if (program.args.length < 1) {
   program.help();
