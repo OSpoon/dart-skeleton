@@ -4,10 +4,10 @@
   "description": "快速骨架屏片段生成器",
   "main": "src",
   "bin": {
-    "ds":"bin/ds.js"
+    "ds": "bin/ds.js"
   },
   "scripts": {
-    "start": "node ./bin/ds.js",
+    "start": "yarn build:script && yarn build:source && node ./index.js",
     "build:script": "tsc -p ./script/tsconfig.json",
     "build:source": "tsc -p ./source/tsconfig.json"
   },
