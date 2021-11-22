@@ -143,23 +143,34 @@ function isHideStyle(node: HTMLElement) {
   return isNone || isHidden || isNoOpacity || node.hidden;
 }
 
+/**
+ * 有背景色且有四边框或设置阴影的需要绘制
+ * @param node 
+ * @returns 
+ */
 function isCustomCardBlock(node: HTMLElement) {
+  // 设置rgba的时候alpha不为0
+  // 不存在渐变内容
   const bgStyle = getStyle(node, "background");
   const bgColorReg = /rgba\([\s\S]+?0\)/gi;
-  const bdReg = /(0px)|(none)/;
   const hasBgColor = !bgColorReg.test(bgStyle) || ~bgStyle.indexOf("gradient");
+  // 检查border的四边是否有0像素或none的情况,四边都有值的时候绘制
+  const bdReg = /(0px)|(none)/;
   const hasNoBorder = ["top", "left", "right", "bottom"].some((item) => {
     return bdReg.test(getStyle(node, "border-" + item).toString());
   });
+  // 存在阴影的情况需要绘制
+  const hasBoxShadow = getStyle(node, "box-shadow") != "none";
   const { w, h } = getRect(node);
-  const customCardBlock = !!(
-    hasBgColor &&
-    (!hasNoBorder || getStyle(node, "box-shadow") != "none") &&
+  // !!: !=null && !=undefined && !=''
+  const customCardBlock = !!(hasBgColor && (!hasNoBorder || hasBoxShadow) &&
     w > 0 &&
     h > 0 &&
+    // 最大宽高设上限,避免尺寸过大绘制效果差
     w < 0.95 * WIN_WIDTH &&
     h < 0.3 * WIN_HEIGHT
   );
+  // 返回true需要绘制
   return customCardBlock;
 }
 
