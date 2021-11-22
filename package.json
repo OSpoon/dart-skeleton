@@ -1,6 +1,6 @@
 {
   "name": "dart-skeleton",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "快速骨架屏片段生成器",
   "main": "src",
   "bin": {
