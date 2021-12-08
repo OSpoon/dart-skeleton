@@ -48,7 +48,7 @@ function parseAgrs(attrs) {
  * @returns
  */
 function percent(total, x) {
-    return Number(parseFloat("" + x / total * 100).toFixed(3));
+    return Number(parseFloat("" + (x / total) * 100).toFixed(3));
 }
 /**
  * 当前节点是否在给定列表中包含
@@ -104,7 +104,8 @@ function isCustomCardBlock(node) {
     var hasBoxShadow = getStyle(node, "box-shadow") != "none";
     var _a = getRect(node), w = _a.w, h = _a.h;
     // !!: !=null && !=undefined && !=''
-    var customCardBlock = !!(hasBgColor && (!hasNoBorder || hasBoxShadow) &&
+    var customCardBlock = !!(hasBgColor &&
+        (!hasNoBorder || hasBoxShadow) &&
         w > 0 &&
         h > 0 &&
         // 最大宽高设上限,避免尺寸过大绘制效果差
@@ -176,7 +177,8 @@ var DrawPageFrame = /** @class */ (function () {
                     // 不进行绘制的元素
                     var isHideNode = isHideStyle(node);
                     // 自定义跳过的元素
-                    var isCustomSkip = typeof _this.includeElement === "function" && _this.includeElement(node, _this.drawBlock) == false;
+                    var isCustomSkip = typeof _this.includeElement === "function" &&
+                        _this.includeElement(node, _this.drawBlock) == false;
                     if (isHideNode || isCustomSkip)
                         continue;
                     // 需要绘制的元素
@@ -202,7 +204,11 @@ var DrawPageFrame = /** @class */ (function () {
                     var _includeElement = includeElement(ELEMENTS, node);
                     // 存疑
                     var _isCustomCardBlock = isCustomCardBlock(node);
-                    if ((_includeElement || _hasBackgroundHasurl || hasText || hasChildText || _isCustomCardBlock) &&
+                    if ((_includeElement ||
+                        _hasBackgroundHasurl ||
+                        hasText ||
+                        hasChildText ||
+                        _isCustomCardBlock) &&
                         !_inHeader) {
                         // top left width high
                         var _a = getRect(node), t = _a.t, l = _a.l, w = _a.w, h = _a.h;
@@ -332,4 +338,4 @@ window.evalDOMScripts = function () {
     });
 };
 // 可以在浏览器中单独运行预览
-// window.evalDOMScripts.apply(window, []);
+// window.evalDOMScripts().then((res) => console.log(res));

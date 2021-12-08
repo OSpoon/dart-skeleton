@@ -10,7 +10,9 @@
     "start": "run-s build:script build:source dev",
     "dev": "node ./index.js",
     "build:script": "tsc -p ./script/tsconfig.json",
-    "build:source": "tsc -p ./source/tsconfig.json"
+    "build:source": "tsc -p ./source/tsconfig.json",
+    "watch:script": "tsc -w -p ./script/tsconfig.json",
+    "watch:source": "tsc -w -p ./source/tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -35,6 +37,7 @@
     "commander": "^8.3.0",
     "jsdom": "^18.1.1",
     "prompts": "^2.4.2",
-    "puppeteer": "^11.0.0"
+    "puppeteer": "^11.0.0",
+    "ts-node": "^10.4.0"
   }
 }
