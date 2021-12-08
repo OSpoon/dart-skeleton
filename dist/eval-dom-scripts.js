@@ -331,3 +331,5 @@ window.evalDOMScripts = function () {
         }, 1000);
     });
 };
+// 可以在浏览器中单独运行预览
+// window.evalDOMScripts.apply(window, []);
