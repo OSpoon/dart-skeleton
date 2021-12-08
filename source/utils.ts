@@ -37,14 +37,15 @@ export function createDefaultHtml(filepath: string) {
 export function rewriteHtml(selector: string, filepath: string, html: string) {
   const appendContent = html;
   const htmlContent = fs.readFileSync(filepath, 'utf-8');
-  const dom = new JSDOM(htmlContent);
-  if (dom) {
-    const appContent = dom.window.document.querySelector(selector);
+  const jsDom = new JSDOM(htmlContent);
+  if (jsDom) {
+    const appContent = jsDom.window.document.querySelector(selector);
     if (appContent) {
       appContent.innerHTML = appendContent;
     }
-    const html = dom.window.document.querySelector('html');
+    const html = jsDom.window.document.querySelector('html');
     if (html) {
+      // 覆盖操作
       const result = html.outerHTML;
       fs.writeFileSync(filepath, result)
     }
