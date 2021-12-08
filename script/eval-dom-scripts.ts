@@ -79,8 +79,8 @@ const classProps: ClassProps = {
 
 /**
  * 解析入参数组为对象格式
- * @param attrs 
- * @returns 
+ * @param attrs
+ * @returns
  */
 function parseAgrs(attrs: Attribute[]) {
   let params = {};
@@ -89,8 +89,8 @@ function parseAgrs(attrs: Attribute[]) {
       type === "function"
         ? _eval("(" + value + ")")
         : type === "object"
-          ? JSON.parse(value)
-          : value;
+        ? JSON.parse(value)
+        : value;
     Reflect.set(params, name, v);
   });
   return params;
@@ -103,14 +103,14 @@ function parseAgrs(attrs: Attribute[]) {
  * @returns
  */
 function percent(total: number, x: number): number {
-  return Number(parseFloat(`${x / total * 100}`).toFixed(3));
+  return Number(parseFloat(`${(x / total) * 100}`).toFixed(3));
 }
 
 /**
  * 当前节点是否在给定列表中包含
- * @param elements 
- * @param node 
- * @returns 
+ * @param elements
+ * @param node
+ * @returns
  */
 function includeElement(elements: string[], node: HTMLElement) {
   return ~elements.indexOf((node.tagName || "").toLowerCase());
@@ -145,8 +145,8 @@ function isHideStyle(node: HTMLElement) {
 
 /**
  * 有背景色且有四边框或设置阴影的需要绘制
- * @param node 
- * @returns 
+ * @param node
+ * @returns
  */
 function isCustomCardBlock(node: HTMLElement) {
   // 设置rgba的时候alpha不为0
@@ -163,7 +163,9 @@ function isCustomCardBlock(node: HTMLElement) {
   const hasBoxShadow = getStyle(node, "box-shadow") != "none";
   const { w, h } = getRect(node);
   // !!: !=null && !=undefined && !=''
-  const customCardBlock = !!(hasBgColor && (!hasNoBorder || hasBoxShadow) &&
+  const customCardBlock = !!(
+    hasBgColor &&
+    (!hasNoBorder || hasBoxShadow) &&
     w > 0 &&
     h > 0 &&
     // 最大宽高设上限,避免尺寸过大绘制效果差
@@ -214,8 +216,8 @@ class DrawPageFrame {
   includeElement: Function;
 
   constructor(opts: Options) {
-    this.init = opts.init || function () { };
-    this.includeElement = opts.includeElement || function () { };
+    this.init = opts.init || function () {};
+    this.includeElement = opts.includeElement || function () {};
     this.background = opts?.background || DEFAULT_BACKGROUND;
     this.animation = opts?.animation || DEFAULT_ANIMATION;
     this.header = opts?.header;
@@ -244,7 +246,9 @@ class DrawPageFrame {
     // body NodeList
     const nodes = this.rootNode.childNodes;
 
-    const deepTraverseNode = (nodes: string | any[] | NodeListOf<ChildNode>) => {
+    const deepTraverseNode = (
+      nodes: string | any[] | NodeListOf<ChildNode>
+    ) => {
       if (nodes.length) {
         for (let i = 0; i < nodes.length; i++) {
           let node = nodes[i];
@@ -252,14 +256,17 @@ class DrawPageFrame {
           // 不进行绘制的元素
           const isHideNode = isHideStyle(node);
           // 自定义跳过的元素
-          const isCustomSkip = typeof this.includeElement === "function" && this.includeElement(node, this.drawBlock) == false;
+          const isCustomSkip =
+            typeof this.includeElement === "function" &&
+            this.includeElement(node, this.drawBlock) == false;
           if (isHideNode || isCustomSkip) continue;
 
           // 需要绘制的元素
           // 1. 元素设置了背景图,即使内容空也绘制
           let background = getStyle(node, "background-image");
           let backgroundHasurl = background.match(/url\(.+?\)/);
-          const _hasBackgroundHasurl = backgroundHasurl && backgroundHasurl.length;
+          const _hasBackgroundHasurl =
+            backgroundHasurl && backgroundHasurl.length;
           // 2. 子元素遍历后有文本元素且有内容就绘制
           let hasChildText = false;
           for (let j = 0; j < childNodes.length; j++) {
@@ -281,7 +288,11 @@ class DrawPageFrame {
           // 存疑
           const _isCustomCardBlock = isCustomCardBlock(node);
           if (
-            (_includeElement || _hasBackgroundHasurl || hasText || hasChildText || _isCustomCardBlock) &&
+            (_includeElement ||
+              _hasBackgroundHasurl ||
+              hasText ||
+              hasChildText ||
+              _isCustomCardBlock) &&
             !_inHeader
           ) {
             // top left width high
@@ -294,7 +305,8 @@ class DrawPageFrame {
               l < WIN_WIDTH &&
               WIN_HEIGHT - t >= 20
             ) {
-              const { paddingTop, paddingLeft, paddingBottom, paddingRight } = getPadding(node);
+              const { paddingTop, paddingLeft, paddingBottom, paddingRight } =
+                getPadding(node);
               const radius = getStyle(node, "border-radius");
               // 绘制色块
               this.drawBlock({
@@ -391,7 +403,7 @@ class DrawPageFrame {
 
   /**
    * 将片段直接注入当前网页的body节点下进行预览
-   * @returns 
+   * @returns
    */
   showBlocks() {
     const { body } = document;
@@ -407,8 +419,8 @@ class DrawPageFrame {
 
 /**
  * 启动脚本函数,挂载到window便于调用
- * @param args 
- * @returns 
+ * @param args
+ * @returns
  */
 // @ts-ignore
 window.evalDOMScripts = (...args: any) => {
@@ -425,4 +437,4 @@ window.evalDOMScripts = (...args: any) => {
 };
 
 // 可以在浏览器中单独运行预览
-// window.evalDOMScripts.apply(window, []);
+// window.evalDOMScripts().then((res) => console.log(res));
